@@ -1,25 +1,30 @@
-import base64
-import zlib
-import re
+import base64, zlib, re
 
-# 读取原始加密文件
-with open('518签到请求.py', 'r', encoding='utf-8', errors='ignore') as f:
-    content = f.read()
+def try_unwrap(data):
+    """递归检测 base64 + zlib 并解压缩"""
+    layer = 0
+    current = data
+    while True:
+        match = re.search(r"^([A-Za-z0-9+/=]+)$", current.strip())
+        if match:
+            try:
+                decoded = base64.b64decode(current.strip())
+                decompressed = zlib.decompress(decoded)
+                text = decompressed.decode('utf-8', errors='ignore')
+                layer += 1
+                print(f"☆解密成功，进入第 {layer} 层：长度 {len(text)}")
+                current = text
+                continue
+            except:
+                break
+        else:
+            break
+    return current, layer
 
-# 正则提取 base64 + zlib 压缩段
-match = re.search(r"zlib\.decompress\(base64\.b64decode\(['\"](.+?)['\"]\)\)", content, re.DOTALL)
-
-if match:
-    encoded_str = match.group(1)
-
-    # 解码与解压
-    decoded = base64.b64decode(encoded_str)
-    decompressed = zlib.decompress(decoded).decode('utf-8', errors='ignore')
-
-    # 写入解密后的内容
-    with open('518yun_解密后.py', 'w', encoding='utf-8') as f_out:
-        f_out.write(decompressed)
-
-    print("✅ 解密完成，文件保存为 518yun_解密后.py")
-else:
-    print("❌ 未找到加密代码段，可能脚本格式不符。")
+if __name__ == "__main__":
+    with open('518yun_解密后_raw.txt', 'r', encoding='utf-8', errors='ignore') as f:
+        raw = f.read()
+    result, count = try_unwrap(raw)
+    print(f"共剥离 {count} 层 base64+zlib，最终长度 {len(result)}")
+    with open('518yun_final.py', 'w', encoding='utf-8') as fout:
+        fout.write(result)
