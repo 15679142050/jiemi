@@ -177,9 +177,20 @@ class MobileCloudDisk:
                 
                 if responses.status_code == 200:
                     responses_data = responses.json()
-                    if "result" in responses_data:
-                        fn_print(f"用户【{self.account}】，===戳一戳成功✅✅===, {responses_data['result']}")
-                        successful_click += 1
+                    # 检查响应数据的详细内容
+                    fn_print(f"戳一戳响应: {responses_data}")
+                    
+                    if "result" in responses_data and responses_data.get("code") == 0:
+                        result = responses_data['result']
+                        if result and str(result) != "null":
+                            fn_print(f"用户【{self.account}】，===戳一戳成功✅✅===, 获得：{result}")
+                            successful_click += 1
+                        else:
+                            fn_print(f"用户【{self.account}】，===戳一戳无奖励===")
+                    elif responses_data.get("msg"):
+                        fn_print(f"戳一戳返回消息: {responses_data.get('msg')}")
+                    else:
+                        fn_print(f"戳一戳响应格式异常: {responses_data}")
                 else:
                     fn_print(f"戳一戳发生异常：{responses.status_code}")
                     
@@ -310,22 +321,39 @@ class MobileCloudDisk:
         """
         await self.rm_sleep()
         task_url = f'https://caiyun.feixin.10086.cn/market/signin/task/click?key=task&id={task_id}'
-        await self.client.get(
+        
+        # 使用重试机制执行任务点击
+        response = await self.retry_request(
+            self.client.get,
+            3,
             url=task_url,
             headers=self.JwtHeaders,
             cookies=self.cookies
         )
+        
+        if response:
+            fn_print(f"任务{task_id}点击响应状态: {response.status_code}")
+            if response.status_code == 200:
+                try:
+                    response_data = response.json()
+                    fn_print(f"任务{task_id}响应数据: {response_data}")
+                except:
+                    fn_print(f"任务{task_id}响应解析失败")
+        
+        # 执行特定任务的额外操作
         if app_type == "cloud_app":
             if task_type == "day":
-                if task_id == 106:
+                if task_id == 106:  # 上传文件任务
                     await self.upload_file()
-                elif task_id == 107:
+                elif task_id == 107:  # 笔记任务
                     await self.refresh_notetoken()
                     await self.get_notebook_id()
             elif task_type == "month":
+                # 月任务的特殊处理
                 pass
         elif app_type == "email_app":
             if task_type == "month":
+                # 邮箱月任务的特殊处理
                 pass
 
     async def sign_in(self):
@@ -709,27 +737,58 @@ class MobileCloudDisk:
                 count = game_info_data.get("result", {}).get("history", {}).get("0", {}).get("count", '')
                 rank = game_info_data.get("result", {}).get("history", {}).get("0", {}).get("rank", '')
                 fn_print(f"今日剩余游戏次数：{curr_num}\n本月排名：{rank}\n合成次数：{count}")
-                for _ in range(curr_num):
-                    await self.client.get(
+                for i in range(curr_num):
+                    # 开始游戏
+                    begin_response = await self.retry_request(
+                        self.client.get,
+                        3,
                         url=bigin_url,
                         headers=self.JwtHeaders,
                         cookies=self.cookies
                     )
-                    fn_print("开始游戏， 等待10-15秒完成游戏")
-                    await asyncio.sleep(random.randint(10, 15))
-                    end_response = await self.client.get(
+                    
+                    if begin_response is None:
+                        fn_print(f"第{i+1}次游戏开始失败，跳过")
+                        continue
+                        
+                    fn_print(f"开始第{i+1}次游戏，等待10-15秒完成游戏")
+                    fn_print(f"游戏开始响应: {begin_response.json() if begin_response.status_code == 200 else begin_response.status_code}")
+                    
+                    # 等待游戏时间
+                    game_time = random.randint(12, 18)  # 增加游戏时间
+                    await asyncio.sleep(game_time)
+                    
+                    # 结束游戏
+                    end_response = await self.retry_request(
+                        self.client.get,
+                        3,
                         url=end_url,
                         headers=self.JwtHeaders,
                         cookies=self.cookies
                     )
+                    
+                    if end_response is None:
+                        fn_print(f"第{i+1}次游戏结束请求失败")
+                        continue
+                        
                     if end_response.status_code == 200:
                         end_data = end_response.json()
+                        fn_print(f"游戏结束响应: {end_data}")
+                        
                         if end_data and end_data.get("code", -1) == 0:
-                            fn_print(f"用户【{self.account}】，===云朵大作战游戏成功✅✅===")
+                            result = end_data.get("result", {})
+                            if result:
+                                fn_print(f"用户【{self.account}】，===第{i+1}次云朵大作战游戏成功✅✅===，结果：{result}")
+                            else:
+                                fn_print(f"用户【{self.account}】，===第{i+1}次云朵大作战游戏成功✅✅===")
                         else:
-                            fn_print(f"用户【{self.account}】，===云朵大作战游戏失败❌===")
+                            fn_print(f"用户【{self.account}】，===第{i+1}次云朵大作战游戏失败❌===，错误：{end_data.get('msg', '未知错误')}")
                     else:
-                        fn_print(f"用户【{self.account}】，===获取云朵大作战游戏信息失败❌===")
+                        fn_print(f"用户【{self.account}】，===第{i+1}次游戏结束请求失败❌，状态码：{end_response.status_code}===")
+                    
+                    # 游戏间隔
+                    if i < curr_num - 1:
+                        await asyncio.sleep(2)
             else:
                 fn_print(f"用户【{self.account}】，===获取云朵大作战游戏信息失败❌===")
         else:
@@ -985,16 +1044,30 @@ class MobileCloudDisk:
         }
         payload = '''                                <pcUploadFileRequest>                                    <ownerMSISDN>{phone}</ownerMSISDN>                                    <fileCount>1</fileCount>                                    <totalSize>1</totalSize>                                    <uploadContentList length="1">                                        <uploadContentInfo>                                            <comlexFlag>0</comlexFlag>                                            <contentDesc><![CDATA[]]></contentDesc>                                            <contentName><![CDATA[000000.txt]]></contentName>                                            <contentSize>1</contentSize>                                            <contentTAGList></contentTAGList>                                            <digest>C4CA4238A0B923820DCC509A6F75849B</digest>                                            <exif/>                                            <fileEtag>0</fileEtag>                                            <fileVersion>0</fileVersion>                                            <updateContentID></updateContentID>                                        </uploadContentInfo>                                    </uploadContentList>                                    <newCatalogName></newCatalogName>                                    <parentCatalogID></parentCatalogID>                                    <operation>0</operation>                                    <path></path>                                    <manualRename>2</manualRename>                                    <autoCreatePath length="0"/>                                    <tagID></tagID>                                    <tagType></tagType>                                </pcUploadFileRequest>                            '''.format(
             phone=self.account)
-        response = await self.client.post(
-            url=url,
-            headers=headers,
-            content=payload
-        )
-        if response is None:
-            return
-        if response.status_code != 200:
-            fn_print(f"上传文件发生异常：{response.status_code}")
-        fn_print(f"用户【{self.account}】，===上传文件成功✅✅===")
+        try:
+            response = await self.retry_request(
+                self.client.post,
+                3,  # 最大重试3次
+                url=url,
+                headers=headers,
+                content=payload
+            )
+            
+            if response is None:
+                fn_print(f"用户【{self.account}】，===上传文件失败❌===")
+                return
+                
+            fn_print(f"上传文件响应状态: {response.status_code}")
+            
+            if response.status_code == 200:
+                # 检查响应内容
+                response_text = response.text
+                fn_print(f"上传文件响应内容: {response_text[:200]}...")  # 只显示前200字符
+                fn_print(f"用户【{self.account}】，===上传文件成功✅✅===")
+            else:
+                fn_print(f"用户【{self.account}】，===上传文件失败❌，状态码：{response.status_code}===")
+        except Exception as e:
+            fn_print(f"用户【{self.account}】，===上传文件异常❌：{str(e)}===")
 
     async def rm_sleep(self, min_delay=1, max_delay=1.5):
         delay = random.uniform(min_delay, max_delay)
