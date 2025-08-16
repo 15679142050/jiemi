@@ -50,7 +50,18 @@ redeem_reward_description = ""  # 兑换的奖品描述，比如哔哩哔哩会�
 
 class MobileCloudDisk:
     def __init__(self, cookie):
-        self.client = httpx.AsyncClient(verify=False, timeout=60)
+        # 设置更合理的超时时间和连接池配置
+        timeout = httpx.Timeout(
+            connect=10.0,  # 连接超时10秒
+            read=30.0,     # 读取超时30秒
+            write=10.0,    # 写入超时10秒
+            pool=60.0      # 连接池超时60秒
+        )
+        self.client = httpx.AsyncClient(
+            verify=False, 
+            timeout=timeout,
+            limits=httpx.Limits(max_keepalive_connections=5, max_connections=10)
+        )
         self.notebook_id = None
         self.note_token = None
         self.note_auth = None
@@ -148,13 +159,22 @@ class MobileCloudDisk:
         url = "https://caiyun.feixin.10086.cn/market/signin/task/click?key=task&id=319"
         successful_click = 0  # 获得次数
         try:
-            for _ in range(self.click_num):
-                responses = await self.client.get(
+            for i in range(self.click_num):
+                # 使用重试机制
+                responses = await self.retry_request(
+                    self.client.get,
+                    3,  # 最大重试3次
                     url=url,
                     headers=self.JwtHeaders,
                     cookies=self.cookies
                 )
-                time.sleep(0.5)
+                
+                if responses is None:
+                    fn_print(f"戳一戳第{i+1}次请求失败，跳过")
+                    continue
+                    
+                await asyncio.sleep(0.5)  # 使用异步sleep
+                
                 if responses.status_code == 200:
                     responses_data = responses.json()
                     if "result" in responses_data:
@@ -162,8 +182,11 @@ class MobileCloudDisk:
                         successful_click += 1
                 else:
                     fn_print(f"戳一戳发生异常：{responses.status_code}")
+                    
             if successful_click == 0:
                 fn_print(f"用户【{self.account}】，===未获得 x {self.click_num}===")
+            else:
+                fn_print(f"用户【{self.account}】，===戳一戳成功 {successful_click} 次===")
         except Exception as e:
             fn_print(f"戳一戳执行异常：{e}")
 
@@ -209,11 +232,17 @@ class MobileCloudDisk:
         :return: 
         """
         task_url = f'https://caiyun.feixin.10086.cn/market/signin/task/taskList?marketname={url}'
-        task_response = await self.client.get(
+        task_response = await self.retry_request(
+            self.client.get,
+            3,  # 最大重试3次
             url=task_url,
             headers=self.JwtHeaders,
             cookies=self.cookies
         )
+        
+        if task_response is None:
+            fn_print(f"获取任务列表失败，跳过 {app_type} 任务")
+            return
         if task_response.status_code == 200:
             task_list = {}
             task_response_data = task_response.json()
@@ -971,6 +1000,29 @@ class MobileCloudDisk:
         delay = random.uniform(min_delay, max_delay)
         await asyncio.sleep(delay)
 
+    async def retry_request(self, request_func, max_retries=3, *args, **kwargs):
+        """
+        重试请求机制
+        :param request_func: 请求函数
+        :param max_retries: 最大重试次数
+        :return: 响应结果或None
+        """
+        for attempt in range(max_retries):
+            try:
+                return await request_func(*args, **kwargs)
+            except (httpx.ConnectTimeout, httpx.ReadTimeout, httpx.NetworkError) as e:
+                if attempt < max_retries - 1:
+                    wait_time = (attempt + 1) * 2  # 递增等待时间
+                    fn_print(f"网络请求失败，{wait_time}秒后重试 (第{attempt + 1}次重试)")
+                    await asyncio.sleep(wait_time)
+                    continue
+                else:
+                    fn_print(f"网络请求失败，已重试{max_retries}次，跳过此请求: {str(e)}")
+                    return None
+            except Exception as e:
+                fn_print(f"请求发生未知异常: {str(e)}")
+                return None
+
     async def random_genner_note_id(self, length):
         characters = '19f3a063d67e4694ca63a4227ec9a94a19088404f9a28084e3e486b928039a299bf756ebc77aa4f6bfa250308ec6a8be8b63b5271a00350d136d117b8a72f39c5bd15cdfd350cba4271dc797f15412d9f269e666aea5039f5049d00739b320bb9e8585a008b52c1cbd86970cae9476446f3e41871de8d9f6112db94b05e5dc7ea0a942a9daf145ac8e487d3d5cba7cea145680efc64794d43dd15c5062b81e1cda7bf278b9bc4e1b8955846e6bc4b6a61c28f831f81b2270289e5a8a677c3141ddc9868129060c0c3b5ef507fbd46c004f6de346332ef7f05c0094215eae1217ee7c13c8dca6d174cfb49c716dd42903bb4b02d823b5f1ff93c3f88768251b56cc'
         note_id = ''.join(random.choice(characters) for _ in range(length))
@@ -1038,41 +1090,60 @@ class MobileCloudDisk:
 
     async def run(self):
         if await self.jwt():
-            fn_print("=========开始签到=========")
-            await self.query_sign_in_status()
-            fn_print("=========开始执行戳一戳=========")
-            await self.a_poke()
-            await self.get_task_list(url="sign_in_3", app_type="cloud_app")
-            fn_print("=========开始执行☁️云朵大作战=========")
-            await self.cloud_game()
-            # fn_print("=========开始执行🌳果园任务=========")
-            # await self.fruit_login()
-            fn_print("=========开始执行📝公众号任务=========")
-            await self.wx_app_sign()
-            await self.shake()
-            await self.surplus_num()
-            fn_print("=========开始执行🔥热门任务=========")
-            await self.backup_cloud()
-            await self.open_send()
-            fn_print("=========开始执行📮139邮箱任务=========")
-            await self.get_task_list(url="newsign_139mail", app_type="email_app")
-            await self.receive()
-            reward_list = await self.get_redeemable_reward_list()
-            if is_redeem and reward_list:
-                fn_print("=========开始🎁兑换奖励=========")
-                found = False
-                for reward in reward_list:
-                    if reward.get("prizeName") == redeem_reward_description:
-                        oid = reward.get("oid")
-                        if oid:
-                            await self.redeem_reward(oid)
-                            found = True
-                            break
-                if not found:
-                    fn_print(f"❌未找到你想要兑换的奖品，请检查奖品名称是否正确")
-
+            # 定义所有任务，每个任务都有独立的异常处理
+            tasks = [
+                ("签到", self.query_sign_in_status),
+                ("戳一戳", self.a_poke),
+                ("云盘任务", lambda: self.get_task_list(url="sign_in_3", app_type="cloud_app")),
+                ("云朵大作战", self.cloud_game),
+                ("公众号签到", self.wx_app_sign),
+                ("抽抽乐-享好礼", self.shake),
+                ("抽奖", self.surplus_num),
+                ("备份云朵", self.backup_cloud),
+                ("通知云朵", self.open_send),
+                ("139邮箱任务", lambda: self.get_task_list(url="newsign_139mail", app_type="email_app")),
+                ("领取云朵", self.receive),
+            ]
+            
+            for task_name, task_func in tasks:
+                try:
+                    fn_print(f"=========开始执行{task_name}=========")
+                    await task_func()
+                    fn_print(f"========={task_name}执行完成=========")
+                except Exception as e:
+                    fn_print(f"❌ {task_name}执行失败: {str(e)}")
+                    continue  # 继续执行下一个任务
+                
+                # 任务间添加短暂延迟
+                await asyncio.sleep(1)
+            
+            # 兑换奖励（如果开启）
+            if is_redeem:
+                try:
+                    fn_print("=========开始🎁兑换奖励=========")
+                    reward_list = await self.get_redeemable_reward_list()
+                    if reward_list:
+                        found = False
+                        for reward in reward_list:
+                            if reward.get("prizeName") == redeem_reward_description:
+                                oid = reward.get("oid")
+                                if oid:
+                                    await self.redeem_reward(oid)
+                                    found = True
+                                    break
+                        if not found:
+                            fn_print(f"❌未找到你想要兑换的奖品，请检查奖品名称是否正确")
+                    else:
+                        fn_print("❌获取奖励列表失败")
+                except Exception as e:
+                    fn_print(f"❌ 兑换奖励失败: {str(e)}")
+            
+            fn_print(f"=========用户【{self.account}】所有任务执行完成=========")
         else:
-            fn_print("token失效")
+            fn_print("❌ token失效，请更新Cookie")
+        
+        # 关闭客户端连接
+        await self.client.aclose()
 
 
 async def main():
