@@ -177,20 +177,20 @@ class MobileCloudDisk:
                 
                 if responses.status_code == 200:
                     responses_data = responses.json()
-                    # 检查响应数据的详细内容
-                    fn_print(f"戳一戳响应: {responses_data}")
                     
-                    if "result" in responses_data and responses_data.get("code") == 0:
-                        result = responses_data['result']
-                        if result and str(result) != "null":
+                    # 戳一戳任务的成功判断：code=0且msg=success就算成功
+                    if responses_data.get("code") == 0 and responses_data.get("msg") == "success":
+                        # 检查是否有result字段且有实际内容
+                        result = responses_data.get('result')
+                        if result and str(result) != "null" and result != "":
                             fn_print(f"用户【{self.account}】，===戳一戳成功✅✅===, 获得：{result}")
                             successful_click += 1
                         else:
-                            fn_print(f"用户【{self.account}】，===戳一戳无奖励===")
-                    elif responses_data.get("msg"):
-                        fn_print(f"戳一戳返回消息: {responses_data.get('msg')}")
+                            # 没有奖励但任务执行成功
+                            fn_print(f"用户【{self.account}】，===戳一戳执行成功，本次无奖励===")
+                            successful_click += 1
                     else:
-                        fn_print(f"戳一戳响应格式异常: {responses_data}")
+                        fn_print(f"戳一戳执行失败: {responses_data}")
                 else:
                     fn_print(f"戳一戳发生异常：{responses.status_code}")
                     
@@ -485,24 +485,33 @@ class MobileCloudDisk:
             if draw_info_data.get('msg') == "success":
                 remain_num = draw_info_data["result"].get("surplusNumber", 0)
                 fn_print(f"剩余抽奖次数{remain_num}")
-                if remain_num > 50 - self.draw:
-                    for _ in range(self.draw):
+                if remain_num > 0:
+                    for i in range(min(self.draw, remain_num)):
                         await self.rm_sleep()
-                        draw_responses = await self.client.get(
+                        draw_responses = await self.retry_request(
+                            self.client.get,
+                            3,
                             url=draw_url,
                             headers=self.JwtHeaders
                         )
-                        if draw_responses.status_code == 200:
+                        
+                        if draw_responses and draw_responses.status_code == 200:
                             draw_data = draw_responses.json()
+                            fn_print(f"第{i+1}次抽奖响应: {draw_data}")
+                            
                             if draw_data.get("code") == 0:
-                                prize_name = draw_data["result"].get("prizeName", "")
-                                fn_print(f"用户【{self.account}】，===抽奖成功✅✅===, 获得：{prize_name}🎉🎉")
+                                result = draw_data.get("result", {})
+                                prize_name = result.get("prizeName", "")
+                                if prize_name:
+                                    fn_print(f"用户【{self.account}】，===第{i+1}次抽奖成功✅✅===, 获得：{prize_name}🎉🎉")
+                                else:
+                                    fn_print(f"用户【{self.account}】，===第{i+1}次抽奖成功✅✅===, 但无奖品信息")
                             else:
-                                fn_print(f"抽奖失败了❌：{draw_data}")
+                                fn_print(f"第{i+1}次抽奖失败：{draw_data}")
                         else:
-                            fn_print(f"抽奖发生异常：{draw_responses.status_code}")
+                            fn_print(f"第{i+1}次抽奖请求失败")
                 else:
-                    pass
+                    fn_print("没有可用的抽奖次数")
             else:
                 fn_print(f"查询剩余抽奖次数发生异常：{draw_info_data.get('msg')}")
         else:
@@ -723,7 +732,7 @@ class MobileCloudDisk:
         :return: 
         """
         game_info_url = 'https://caiyun.feixin.10086.cn/market/signin/hecheng1T/info?op=info'
-        bigin_url = 'https://caiyun.feixin.10086.cn/market/signin/hecheng1T/beinvite'
+        begin_url = 'https://caiyun.feixin.10086.cn/market/signin/hecheng1T/beinvite'
         end_url = 'https://caiyun.feixin.10086.cn/market/signin/hecheng1T/finish?flag=true'
         game_info_response = await self.client.get(
             url=game_info_url,
@@ -738,13 +747,14 @@ class MobileCloudDisk:
                 rank = game_info_data.get("result", {}).get("history", {}).get("0", {}).get("rank", '')
                 fn_print(f"今日剩余游戏次数：{curr_num}\n本月排名：{rank}\n合成次数：{count}")
                 for i in range(curr_num):
-                    # 开始游戏
+                    # 开始游戏 - 使用POST请求并添加必要的参数
                     begin_response = await self.retry_request(
-                        self.client.get,
+                        self.client.post,
                         3,
-                        url=bigin_url,
+                        url=begin_url,
                         headers=self.JwtHeaders,
-                        cookies=self.cookies
+                        cookies=self.cookies,
+                        json={}  # 添加空的JSON体
                     )
                     
                     if begin_response is None:
@@ -758,13 +768,14 @@ class MobileCloudDisk:
                     game_time = random.randint(12, 18)  # 增加游戏时间
                     await asyncio.sleep(game_time)
                     
-                    # 结束游戏
+                    # 结束游戏 - 使用POST请求
                     end_response = await self.retry_request(
-                        self.client.get,
+                        self.client.post,
                         3,
                         url=end_url,
                         headers=self.JwtHeaders,
-                        cookies=self.cookies
+                        cookies=self.cookies,
+                        json={}  # 添加空的JSON体
                     )
                     
                     if end_response is None:
@@ -1032,7 +1043,12 @@ class MobileCloudDisk:
         上传文件
         :return: 
         """
-        url = 'http://ose.caiyun.feixin.10086.cn/richlifeApp/devapp/IUploadAndDownload'
+        # 尝试不同的上传接口
+        urls = [
+            'https://ose.caiyun.feixin.10086.cn/richlifeApp/devapp/IUploadAndDownload',
+            'http://ose.caiyun.feixin.10086.cn/richlifeApp/devapp/IUploadAndDownload',
+            'https://caiyun.feixin.10086.cn/market/signin/task/uploadFile'
+        ]
         headers = {
             'x-huawei-uploadSrc': '1', 'x-ClientOprType': '11', 'Connection': 'keep-alive', 'x-NetType': '6',
             'x-DeviceInfo': '6|127.0.0.1|1|10.0.1|Xiaomi|M2012K10C|CB63218727431865A48E691BFFDB49A1|02-00-00-00-00-00|android 11|1080X2272|zh||||032|',
@@ -1044,30 +1060,41 @@ class MobileCloudDisk:
         }
         payload = '''                                <pcUploadFileRequest>                                    <ownerMSISDN>{phone}</ownerMSISDN>                                    <fileCount>1</fileCount>                                    <totalSize>1</totalSize>                                    <uploadContentList length="1">                                        <uploadContentInfo>                                            <comlexFlag>0</comlexFlag>                                            <contentDesc><![CDATA[]]></contentDesc>                                            <contentName><![CDATA[000000.txt]]></contentName>                                            <contentSize>1</contentSize>                                            <contentTAGList></contentTAGList>                                            <digest>C4CA4238A0B923820DCC509A6F75849B</digest>                                            <exif/>                                            <fileEtag>0</fileEtag>                                            <fileVersion>0</fileVersion>                                            <updateContentID></updateContentID>                                        </uploadContentInfo>                                    </uploadContentList>                                    <newCatalogName></newCatalogName>                                    <parentCatalogID></parentCatalogID>                                    <operation>0</operation>                                    <path></path>                                    <manualRename>2</manualRename>                                    <autoCreatePath length="0"/>                                    <tagID></tagID>                                    <tagType></tagType>                                </pcUploadFileRequest>                            '''.format(
             phone=self.account)
-        try:
-            response = await self.retry_request(
-                self.client.post,
-                3,  # 最大重试3次
-                url=url,
-                headers=headers,
-                content=payload
-            )
-            
-            if response is None:
-                fn_print(f"用户【{self.account}】，===上传文件失败❌===")
-                return
+        # 尝试多个上传接口
+        success = False
+        for i, url in enumerate(urls):
+            try:
+                fn_print(f"尝试上传接口 {i+1}: {url}")
+                response = await self.retry_request(
+                    self.client.post,
+                    2,  # 每个接口最大重试2次
+                    url=url,
+                    headers=headers,
+                    content=payload
+                )
                 
-            fn_print(f"上传文件响应状态: {response.status_code}")
-            
-            if response.status_code == 200:
-                # 检查响应内容
-                response_text = response.text
-                fn_print(f"上传文件响应内容: {response_text[:200]}...")  # 只显示前200字符
-                fn_print(f"用户【{self.account}】，===上传文件成功✅✅===")
-            else:
-                fn_print(f"用户【{self.account}】，===上传文件失败❌，状态码：{response.status_code}===")
-        except Exception as e:
-            fn_print(f"用户【{self.account}】，===上传文件异常❌：{str(e)}===")
+                if response is None:
+                    fn_print(f"接口 {i+1} 请求失败，尝试下一个")
+                    continue
+                    
+                fn_print(f"接口 {i+1} 响应状态: {response.status_code}")
+                
+                if response.status_code == 200:
+                    # 检查响应内容
+                    response_text = response.text
+                    fn_print(f"上传响应内容: {response_text[:200]}...")
+                    fn_print(f"用户【{self.account}】，===上传文件成功✅✅===")
+                    success = True
+                    break
+                else:
+                    fn_print(f"接口 {i+1} 状态码：{response.status_code}，尝试下一个")
+                    
+            except Exception as e:
+                fn_print(f"接口 {i+1} 异常：{str(e)}，尝试下一个")
+                continue
+        
+        if not success:
+            fn_print(f"用户【{self.account}】，===所有上传接口都失败❌===")
 
     async def rm_sleep(self, min_delay=1, max_delay=1.5):
         delay = random.uniform(min_delay, max_delay)
