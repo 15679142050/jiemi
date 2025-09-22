@@ -1,3 +1,6 @@
+//Mon Sep 22 2025 20:40:56 GMT+0000 (Coordinated Universal Time)
+//Base:<url id="cv1cref6o68qmpt26ol0" type="url" status="parsed" title="GitHub - echo094/decode-js: JS混淆代码的AST分析工具 AST analysis tool for obfuscated JS code" wc="2165">https://github.com/echo094/decode-js</url>
+//Modify:<url id="cv1cref6o68qmpt26olg" type="url" status="parsed" title="GitHub - smallfawn/decode_action: 世界上本来不存在加密，加密的人多了，也便成就了解密" wc="741">https://github.com/smallfawn/decode_action</url>
 //Mon Sep 22 2025 20:39:07 GMT+0000 (Coordinated Universal Time)
 //Base:<url id="cv1cref6o68qmpt26ol0" type="url" status="parsed" title="GitHub - echo094/decode-js: JS混淆代码的AST分析工具 AST analysis tool for obfuscated JS code" wc="2165">https://github.com/echo094/decode-js</url>
 //Modify:<url id="cv1cref6o68qmpt26olg" type="url" status="parsed" title="GitHub - smallfawn/decode_action: 世界上本来不存在加密，加密的人多了，也便成就了解密" wc="741">https://github.com/smallfawn/decode_action</url>
@@ -516,13 +519,9 @@ const notify = $.isNode() ? require("../sendNotify") : "";
   };
   function k(P) {
     k = "function" == typeof Symbol && "symbol" == typeof Symbol.iterator ? function (S) {
-      {
-        return typeof S;
-      }
+      return typeof S;
     } : function (S) {
-      {
-        return S && "function" == typeof Symbol && S.constructor === Symbol && S !== Symbol.prototype ? "symbol" : typeof S;
-      }
+      return S && "function" == typeof Symbol && S.constructor === Symbol && S !== Symbol.prototype ? "symbol" : typeof S;
     };
     return k(P);
   }
@@ -602,99 +601,73 @@ const notify = $.isNode() ? require("../sendNotify") : "";
       dQVcK: "Vjpmt",
       wkWYo: "CUHLi"
     };
-    {
-      var S = "undefined" != typeof Symbol && P[Symbol.iterator] || P["@@iterator"];
-      if (!S) {
-        {
-          if (Array.isArray(P) || (S = function (Z, a0) {
-            {
-              if (Z) {
-                {
-                  if ("string" == typeof Z) {
-                    return w(Z, a0);
-                  }
-                  var a1 = {}.toString.call(Z).slice(8, -1);
-                  "Object" === a1 && Z.constructor && (a1 = Z.constructor.name);
-                  return "Map" === a1 || "Set" === a1 ? Array.from(Z) : "Arguments" === a1 || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(a1) ? w(Z, a0) : undefined;
-                }
-              }
-            }
-          }(P)) || Q && P && "number" == typeof P.length) {
-            S && (P = S);
-            var T = 0;
-            var U = function () {};
-            return {
-              s: U,
-              n: function () {
-                {
-                  var a0 = {
-                    done: true
-                  };
-                  return T >= P.length ? a0 : {
-                    done: false,
-                    value: P[T++]
-                  };
-                }
-              },
-              e: function (a0) {
-                {
-                  throw a0;
-                }
-              },
-              f: U
-            };
+    var S = "undefined" != typeof Symbol && P[Symbol.iterator] || P["@@iterator"];
+    if (!S) {
+      if (Array.isArray(P) || (S = function (Z, a0) {
+        if (Z) {
+          if ("string" == typeof Z) {
+            return w(Z, a0);
           }
-          throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+          var a1 = {}.toString.call(Z).slice(8, -1);
+          "Object" === a1 && Z.constructor && (a1 = Z.constructor.name);
+          return "Map" === a1 || "Set" === a1 ? Array.from(Z) : "Arguments" === a1 || /^(?:Ui|I)nt(?:8|16|32)(?:Clamped)?Array$/.test(a1) ? w(Z, a0) : undefined;
+        }
+      }(P)) || Q && P && "number" == typeof P.length) {
+        S && (P = S);
+        var T = 0;
+        var U = function () {};
+        return {
+          s: U,
+          n: function () {
+            var a0 = {
+              done: true
+            };
+            return T >= P.length ? a0 : {
+              done: false,
+              value: P[T++]
+            };
+          },
+          e: function (a0) {
+            throw a0;
+          },
+          f: U
+        };
+      }
+      throw new TypeError("Invalid attempt to iterate non-iterable instance.\nIn order to be iterable, non-array objects must have a [Symbol.iterator]() method.");
+    }
+    var V;
+    var W = true;
+    var X = false;
+    return {
+      s: function () {
+        S = S.call(P);
+      },
+      n: function () {
+        var a0 = S.next();
+        W = a0.done;
+        return a0;
+      },
+      e: function (a0) {
+        X = true;
+        V = a0;
+      },
+      f: function () {
+        try {
+          W || null == S.return || S.return();
+        } finally {
+          if (X) {
+            throw V;
+          }
         }
       }
-      var V;
-      var W = true;
-      var X = false;
-      return {
-        s: function () {
-          {
-            S = S.call(P);
-          }
-        },
-        n: function () {
-          {
-            var a0 = S.next();
-            W = a0.done;
-            return a0;
-          }
-        },
-        e: function (a0) {
-          {
-            X = true;
-            V = a0;
-          }
-        },
-        f: function () {
-          {
-            try {
-              {
-                W || null == S.return || S.return();
-              }
-            } finally {
-              {
-                if (X) {
-                  throw V;
-                }
-              }
-            }
-          }
-        }
-      };
-    }
+    };
   }
   function w(P, Q) {
-    {
-      (null == Q || Q > P.length) && (Q = P.length);
-      for (var R = 0, S = Array(Q); R < Q; R++) {
-        S[R] = P[R];
-      }
-      return S;
+    (null == Q || Q > P.length) && (Q = P.length);
+    for (var R = 0, S = Array(Q); R < Q; R++) {
+      S[R] = P[R];
     }
+    return S;
   }
   function x() {
     "use strict";
@@ -937,9 +910,7 @@ const notify = $.isNode() ? require("../sendNotify") : "";
       iHSzx: "kKTjO"
     };
     x = function () {
-      {
-        return U;
-      }
+      return U;
     };
     var R;
     var U = {};
@@ -953,55 +924,43 @@ const notify = $.isNode() ? require("../sendNotify") : "";
     var a0 = Y.asyncIterator || "@@asyncIterator";
     var a1 = Y.toStringTag || "@@toStringTag";
     function a2(ap, aq, ar) {
-      {
-        var as = {
-          value: ar,
-          enumerable: true,
-          configurable: true,
-          writable: true
-        };
-        Object.defineProperty(ap, aq, as);
-        return ap[aq];
-      }
+      var as = {
+        value: ar,
+        enumerable: true,
+        configurable: true,
+        writable: true
+      };
+      Object.defineProperty(ap, aq, as);
+      return ap[aq];
     }
     try {
-      {
-        a2({}, "");
-      }
+      a2({}, "");
     } catch (aq) {
-      {
-        a2 = function (as, at, au) {
-          return as[at] = au;
-        };
-      }
+      a2 = function (as, at, au) {
+        return as[at] = au;
+      };
     }
     function a3(as, at, au, av) {
-      {
-        var aw = at && at.prototype instanceof aa ? at : aa;
-        var ax = Object.create(aw.prototype);
-        var ay = new an(av || []);
-        X(ax, "_invoke", {
-          value: aj(as, au, ay)
-        });
-        return ax;
-      }
+      var aw = at && at.prototype instanceof aa ? at : aa;
+      var ax = Object.create(aw.prototype);
+      var ay = new an(av || []);
+      X(ax, "_invoke", {
+        value: aj(as, au, ay)
+      });
+      return ax;
     }
     function a4(as, at, au) {
-      {
-        try {
-          return {
-            type: "normal",
-            arg: as.call(at, au)
-          };
-        } catch (ax) {
-          {
-            var av = {
-              type: "throw",
-              arg: ax
-            };
-            return av;
-          }
-        }
+      try {
+        return {
+          type: "normal",
+          arg: as.call(at, au)
+        };
+      } catch (ax) {
+        var av = {
+          type: "throw",
+          arg: ax
+        };
+        return av;
       }
     }
     U.wrap = a3;
@@ -1023,217 +982,165 @@ const notify = $.isNode() ? require("../sendNotify") : "";
     ac.prototype = aa.prototype = Object.create(ad);
     var ag = ac.prototype;
     function ah(as) {
-      {
-        ["next", "throw", "return"].forEach(function (au) {
-          a2(as, au, function (aw) {
-            {
-              return this._invoke(au, aw);
-            }
-          });
+      ["next", "throw", "return"].forEach(function (au) {
+        a2(as, au, function (aw) {
+          return this._invoke(au, aw);
         });
-      }
+      });
     }
     function ai(as, at) {
-      {
-        function aw(ax, ay, az, aA) {
-          {
-            var aC = a4(as[ax], as, ay);
-            if ("throw" !== aC.type) {
-              {
-                var aD = aC.arg;
-                var aE = aD.value;
-                return aE && "object" == k(aE) && W.call(aE, "__await") ? at.resolve(aE.__await).then(function (aH) {
-                  {
-                    aw("next", aH, az, aA);
-                  }
-                }, function (aH) {
-                  {
-                    aw("throw", aH, az, aA);
-                  }
-                }) : at.resolve(aE).then(function (aH) {
-                  {
-                    aD.value = aH;
-                    az(aD);
-                  }
-                }, function (aH) {
-                  {
-                    return aw("throw", aH, az, aA);
-                  }
-                });
-              }
-            }
-            aA(aC.arg);
-          }
+      function aw(ax, ay, az, aA) {
+        var aC = a4(as[ax], as, ay);
+        if ("throw" !== aC.type) {
+          var aD = aC.arg;
+          var aE = aD.value;
+          return aE && "object" == k(aE) && W.call(aE, "__await") ? at.resolve(aE.__await).then(function (aH) {
+            aw("next", aH, az, aA);
+          }, function (aH) {
+            aw("throw", aH, az, aA);
+          }) : at.resolve(aE).then(function (aH) {
+            aD.value = aH;
+            az(aD);
+          }, function (aH) {
+            return aw("throw", aH, az, aA);
+          });
         }
-        var av;
-        X(this, "_invoke", {
-          value: function (ax, ay) {
-            {
-              function aB() {
-                {
-                  return new at(function (aF, aG) {
-                    aw(ax, ay, aF, aG);
-                  });
-                }
-              }
-              return av = av ? av.then(aB, aB) : aB();
-            }
-          }
-        });
+        aA(aC.arg);
       }
+      var av;
+      X(this, "_invoke", {
+        value: function (ax, ay) {
+          function aB() {
+            return new at(function (aF, aG) {
+              aw(ax, ay, aF, aG);
+            });
+          }
+          return av = av ? av.then(aB, aB) : aB();
+        }
+      });
     }
     function aj(as, at, au) {
-      {
-        var aw = a5;
-        return function (ax, ay) {
-          {
-            if (aw === a7) {
-              throw Error("Generator is already running");
-            }
-            if (aw === a8) {
-              {
-                if ("throw" === ax) {
-                  throw ay;
-                }
-                var aA = {
-                  value: R,
-                  done: true
-                };
-                return aA;
+      var aw = a5;
+      return function (ax, ay) {
+        if (aw === a7) {
+          throw Error("Generator is already running");
+        }
+        if (aw === a8) {
+          if ("throw" === ax) {
+            throw ay;
+          }
+          var aA = {
+            value: R,
+            done: true
+          };
+          return aA;
+        }
+        for (au.method = ax, au.arg = ay;;) {
+          var aB = au.delegate;
+          if (aB) {
+            var aC = ak(aB, au);
+            if (aC) {
+              if (aC === a9) {
+                continue;
               }
-            }
-            for (au.method = ax, au.arg = ay;;) {
-              {
-                var aB = au.delegate;
-                if (aB) {
-                  {
-                    var aC = ak(aB, au);
-                    if (aC) {
-                      {
-                        if (aC === a9) {
-                          continue;
-                        }
-                        return aC;
-                      }
-                    }
-                  }
-                }
-                if ("next" === au.method) {
-                  au.sent = au._sent = au.arg;
-                } else {
-                  if ("throw" === au.method) {
-                    {
-                      if (aw === a5) {
-                        throw aw = a8, au.arg;
-                      }
-                      au.dispatchException(au.arg);
-                    }
-                  } else {
-                    "return" === au.method && au.abrupt("return", au.arg);
-                  }
-                }
-                aw = a7;
-                var aD = a4(as, at, au);
-                if ("normal" === aD.type) {
-                  {
-                    if (aw = au.done ? a8 : a6, aD.arg === a9) {
-                      continue;
-                    }
-                    var aE = {
-                      value: aD.arg,
-                      done: au.done
-                    };
-                    return aE;
-                  }
-                }
-                "throw" === aD.type && (aw = a8, au.method = "throw", au.arg = aD.arg);
-              }
+              return aC;
             }
           }
-        };
-      }
+          if ("next" === au.method) {
+            au.sent = au._sent = au.arg;
+          } else {
+            if ("throw" === au.method) {
+              if (aw === a5) {
+                throw aw = a8, au.arg;
+              }
+              au.dispatchException(au.arg);
+            } else {
+              "return" === au.method && au.abrupt("return", au.arg);
+            }
+          }
+          aw = a7;
+          var aD = a4(as, at, au);
+          if ("normal" === aD.type) {
+            if (aw = au.done ? a8 : a6, aD.arg === a9) {
+              continue;
+            }
+            var aE = {
+              value: aD.arg,
+              done: au.done
+            };
+            return aE;
+          }
+          "throw" === aD.type && (aw = a8, au.method = "throw", au.arg = aD.arg);
+        }
+      };
     }
     function ak(as, at) {
-      {
-        var au = at.method;
-        var av = as.iterator[au];
-        if (av === R) {
-          at.delegate = null;
-          "throw" === au && as.iterator.return && (at.method = "return", at.arg = R, ak(as, at), "throw" === at.method) || "return" !== au && (at.method = "throw", at.arg = new TypeError("The iterator does not provide a '" + au + "' method"));
-          return a9;
-        }
-        var aw = a4(av, as.iterator, at.arg);
-        if ("throw" === aw.type) {
-          at.method = "throw";
-          at.arg = aw.arg;
-          at.delegate = null;
-          return a9;
-        }
-        var ax = aw.arg;
-        return ax ? ax.done ? (at[as.resultName] = ax.value, at.next = as.nextLoc, "return" !== at.method && (at.method = "next", at.arg = R), at.delegate = null, a9) : ax : (at.method = "throw", at.arg = new TypeError("iterator result is not an object"), at.delegate = null, a9);
+      var au = at.method;
+      var av = as.iterator[au];
+      if (av === R) {
+        at.delegate = null;
+        "throw" === au && as.iterator.return && (at.method = "return", at.arg = R, ak(as, at), "throw" === at.method) || "return" !== au && (at.method = "throw", at.arg = new TypeError("The iterator does not provide a '" + au + "' method"));
+        return a9;
       }
+      var aw = a4(av, as.iterator, at.arg);
+      if ("throw" === aw.type) {
+        at.method = "throw";
+        at.arg = aw.arg;
+        at.delegate = null;
+        return a9;
+      }
+      var ax = aw.arg;
+      return ax ? ax.done ? (at[as.resultName] = ax.value, at.next = as.nextLoc, "return" !== at.method && (at.method = "next", at.arg = R), at.delegate = null, a9) : ax : (at.method = "throw", at.arg = new TypeError("iterator result is not an object"), at.delegate = null, a9);
     }
     function al(as) {
-      {
-        var aw = {
-          tryLoc: as[0]
-        };
-        1 in as && (aw.catchLoc = as[1]);
-        2 in as && (aw.finallyLoc = as[2], aw.afterLoc = as[3]);
-        this.tryEntries.push(aw);
-      }
+      var aw = {
+        tryLoc: as[0]
+      };
+      1 in as && (aw.catchLoc = as[1]);
+      2 in as && (aw.finallyLoc = as[2], aw.afterLoc = as[3]);
+      this.tryEntries.push(aw);
     }
     function am(as) {
-      {
-        var av = as.completion || {};
-        av.type = "normal";
-        delete av.arg;
-        as.completion = av;
-      }
+      var av = as.completion || {};
+      av.type = "normal";
+      delete av.arg;
+      as.completion = av;
     }
     function an(as) {
-      {
-        var at = {
-          tryLoc: "root"
-        };
-        this.tryEntries = [at];
-        as.forEach(al, this);
-        this.reset(true);
-      }
+      var at = {
+        tryLoc: "root"
+      };
+      this.tryEntries = [at];
+      as.forEach(al, this);
+      this.reset(true);
     }
     function ao(as) {
-      {
-        if (as || "" === as) {
-          var au = as[Z];
-          if (au) {
-            return au.call(as);
-          }
-          if ("function" == typeof as.next) {
-            return as;
-          }
-          if (!isNaN(as.length)) {
-            {
-              var av = -1;
-              var aw = function az() {
-                {
-                  for (; ++av < as.length;) {
-                    if (W.call(as, av)) {
-                      az.value = as[av];
-                      az.done = false;
-                      return az;
-                    }
-                  }
-                  az.value = R;
-                  az.done = true;
-                  return az;
-                }
-              };
-              return aw.next = aw;
-            }
-          }
+      if (as || "" === as) {
+        var au = as[Z];
+        if (au) {
+          return au.call(as);
         }
-        throw new TypeError(k(as) + " is not iterable");
+        if ("function" == typeof as.next) {
+          return as;
+        }
+        if (!isNaN(as.length)) {
+          var av = -1;
+          var aw = function az() {
+            for (; ++av < as.length;) {
+              if (W.call(as, av)) {
+                az.value = as[av];
+                az.done = false;
+                return az;
+              }
+            }
+            az.value = R;
+            az.done = true;
+            return az;
+          };
+          return aw.next = aw;
+        }
       }
+      throw new TypeError(k(as) + " is not iterable");
     }
     ab.prototype = ac;
     X(ag, "constructor", {
@@ -1246,43 +1153,31 @@ const notify = $.isNode() ? require("../sendNotify") : "";
     });
     ab.displayName = a2(ac, a1, "GeneratorFunction");
     U.isGeneratorFunction = function (as) {
-      {
-        var at = "function" == typeof as && as.constructor;
-        return !!at && (at === ab || "GeneratorFunction" === (at.displayName || at.name));
-      }
+      var at = "function" == typeof as && as.constructor;
+      return !!at && (at === ab || "GeneratorFunction" === (at.displayName || at.name));
     };
     U.mark = function (as) {
-      {
-        Object.setPrototypeOf ? Object.setPrototypeOf(as, ac) : (as.__proto__ = ac, a2(as, a1, "GeneratorFunction"));
-        as.prototype = Object.create(ag);
-        return as;
-      }
+      Object.setPrototypeOf ? Object.setPrototypeOf(as, ac) : (as.__proto__ = ac, a2(as, a1, "GeneratorFunction"));
+      as.prototype = Object.create(ag);
+      return as;
     };
     U.awrap = function (as) {
-      {
-        var at = {
-          __await: as
-        };
-        return at;
-      }
+      var at = {
+        __await: as
+      };
+      return at;
     };
     ah(ai.prototype);
     a2(ai.prototype, a0, function () {
-      {
-        return this;
-      }
+      return this;
     });
     U.AsyncIterator = ai;
     U.async = function (as, at, au, av, aw) {
-      {
-        undefined === aw && (aw = Promise);
-        var ay = new ai(a3(as, at, au, av), aw);
-        return U.isGeneratorFunction(at) ? ay : ay.next().then(function (az) {
-          {
-            return az.done ? az.value : ay.next();
-          }
-        });
-      }
+      undefined === aw && (aw = Promise);
+      var ay = new ai(a3(as, at, au, av), aw);
+      return U.isGeneratorFunction(at) ? ay : ay.next().then(function (az) {
+        return az.done ? az.value : ay.next();
+      });
     };
     ah(ag);
     a2(ag, a1, "Generator");
@@ -1290,107 +1185,81 @@ const notify = $.isNode() ? require("../sendNotify") : "";
       return this;
     });
     a2(ag, "toString", function () {
-      {
-        return "[object Generator]";
-      }
+      return "[object Generator]";
     });
     U.keys = function (as) {
-      {
-        var at = Object(as);
-        var au = [];
-        for (var av in at) au.push(av);
-        au.reverse();
-        return function ax() {
-          {
-            for (; au.length;) {
-              {
-                var ay = au.pop();
-                if (ay in at) {
-                  ax.value = ay;
-                  ax.done = false;
-                  return ax;
-                }
-              }
-            }
-            ax.done = true;
+      var at = Object(as);
+      var au = [];
+      for (var av in at) au.push(av);
+      au.reverse();
+      return function ax() {
+        for (; au.length;) {
+          var ay = au.pop();
+          if (ay in at) {
+            ax.value = ay;
+            ax.done = false;
             return ax;
           }
-        };
-      }
+        }
+        ax.done = true;
+        return ax;
+      };
     };
     U.values = ao;
     an.prototype = {
       constructor: an,
       reset: function (as) {
-        {
-          if (this.prev = 0, this.next = 0, this.sent = this._sent = R, this.done = false, this.delegate = null, this.method = "next", this.arg = R, this.tryEntries.forEach(am), !as) {
-            for (var at in this) "t" === at.charAt(0) && W.call(this, at) && !isNaN(+at.slice(1)) && (this[at] = R);
-          }
+        if (this.prev = 0, this.next = 0, this.sent = this._sent = R, this.done = false, this.delegate = null, this.method = "next", this.arg = R, this.tryEntries.forEach(am), !as) {
+          for (var at in this) "t" === at.charAt(0) && W.call(this, at) && !isNaN(+at.slice(1)) && (this[at] = R);
         }
       },
       stop: function () {
-        {
-          this.done = true;
-          var as = this.tryEntries[0].completion;
-          if ("throw" === as.type) {
-            throw as.arg;
-          }
-          return this.rval;
+        this.done = true;
+        var as = this.tryEntries[0].completion;
+        if ("throw" === as.type) {
+          throw as.arg;
         }
+        return this.rval;
       },
       dispatchException: function (as) {
-        {
-          if (this.done) {
-            throw as;
+        if (this.done) {
+          throw as;
+        }
+        var au = this;
+        function aB(aC, aD) {
+          ax.type = "throw";
+          ax.arg = as;
+          au.next = aC;
+          aD && (au.method = "next", au.arg = R);
+          return !!aD;
+        }
+        for (var av = this.tryEntries.length - 1; av >= 0; --av) {
+          var aw = this.tryEntries[av];
+          var ax = aw.completion;
+          if ("root" === aw.tryLoc) {
+            return aB("end");
           }
-          var au = this;
-          function aB(aC, aD) {
-            {
-              ax.type = "throw";
-              ax.arg = as;
-              au.next = aC;
-              aD && (au.method = "next", au.arg = R);
-              return !!aD;
-            }
-          }
-          for (var av = this.tryEntries.length - 1; av >= 0; --av) {
-            {
-              var aw = this.tryEntries[av];
-              var ax = aw.completion;
-              if ("root" === aw.tryLoc) {
-                return aB("end");
+          if (aw.tryLoc <= this.prev) {
+            var ay = W.call(aw, "catchLoc");
+            var az = W.call(aw, "finallyLoc");
+            if (ay && az) {
+              if (this.prev < aw.catchLoc) {
+                return aB(aw.catchLoc, true);
               }
-              if (aw.tryLoc <= this.prev) {
-                {
-                  var ay = W.call(aw, "catchLoc");
-                  var az = W.call(aw, "finallyLoc");
-                  if (ay && az) {
-                    {
-                      if (this.prev < aw.catchLoc) {
-                        return aB(aw.catchLoc, true);
-                      }
-                      if (this.prev < aw.finallyLoc) {
-                        return aB(aw.finallyLoc);
-                      }
-                    }
-                  } else {
-                    if (ay) {
-                      {
-                        if (this.prev < aw.catchLoc) {
-                          return aB(aw.catchLoc, true);
-                        }
-                      }
-                    } else {
-                      {
-                        if (!az) {
-                          throw Error("try statement without catch or finally");
-                        }
-                        if (this.prev < aw.finallyLoc) {
-                          return aB(aw.finallyLoc);
-                        }
-                      }
-                    }
-                  }
+              if (this.prev < aw.finallyLoc) {
+                return aB(aw.finallyLoc);
+              }
+            } else {
+              if (ay) {
+                if (this.prev < aw.catchLoc) {
+                  return aB(aw.catchLoc, true);
+                }
+              } else {
+                if (!az) {
+                  throw Error("try statement without catch or finally");
+                }
+                if (this.prev < aw.finallyLoc) {
+                  return aB(aw.finallyLoc);
                 }
               }
             }
@@ -1398,98 +1267,70 @@ const notify = $.isNode() ? require("../sendNotify") : "";
         }
       },
       abrupt: function (as, at) {
-        {
-          for (var av = this.tryEntries.length - 1; av >= 0; --av) {
-            {
-              var aw = this.tryEntries[av];
-              if (aw.tryLoc <= this.prev && W.call(aw, "finallyLoc") && this.prev < aw.finallyLoc) {
-                {
-                  var ax = aw;
-                  break;
-                }
-              }
-            }
+        for (var av = this.tryEntries.length - 1; av >= 0; --av) {
+          var aw = this.tryEntries[av];
+          if (aw.tryLoc <= this.prev && W.call(aw, "finallyLoc") && this.prev < aw.finallyLoc) {
+            var ax = aw;
+            break;
           }
-          ax && ("break" === as || "continue" === as) && ax.tryLoc <= at && at <= ax.finallyLoc && (ax = null);
-          var ay = ax ? ax.completion : {};
-          ay.type = as;
-          ay.arg = at;
-          return ax ? (this.method = "next", this.next = ax.finallyLoc, a9) : this.complete(ay);
         }
+        ax && ("break" === as || "continue" === as) && ax.tryLoc <= at && at <= ax.finallyLoc && (ax = null);
+        var ay = ax ? ax.completion : {};
+        ay.type = as;
+        ay.arg = at;
+        return ax ? (this.method = "next", this.next = ax.finallyLoc, a9) : this.complete(ay);
       },
       complete: function (as, at) {
-        {
-          if ("throw" === as.type) {
-            throw as.arg;
-          }
-          "break" === as.type || "continue" === as.type ? this.next = as.arg : "return" === as.type ? (this.rval = this.arg = as.arg, this.method = "return", this.next = "end") : "normal" === as.type && at && (this.next = at);
-          return a9;
+        if ("throw" === as.type) {
+          throw as.arg;
         }
+        "break" === as.type || "continue" === as.type ? this.next = as.arg : "return" === as.type ? (this.rval = this.arg = as.arg, this.method = "return", this.next = "end") : "normal" === as.type && at && (this.next = at);
+        return a9;
       },
       finish: function (as) {
-        {
-          for (var av = this.tryEntries.length - 1; av >= 0; --av) {
-            {
-              var aw = this.tryEntries[av];
-              if (aw.finallyLoc === as) {
-                this.complete(aw.completion, aw.afterLoc);
-                am(aw);
-                return a9;
-              }
-            }
+        for (var av = this.tryEntries.length - 1; av >= 0; --av) {
+          var aw = this.tryEntries[av];
+          if (aw.finallyLoc === as) {
+            this.complete(aw.completion, aw.afterLoc);
+            am(aw);
+            return a9;
           }
         }
       },
       catch: function (as) {
-        {
-          for (var au = this.tryEntries.length - 1; au >= 0; --au) {
-            {
-              var av = this.tryEntries[au];
-              if (av.tryLoc === as) {
-                {
-                  var aw = av.completion;
-                  if ("throw" === aw.type) {
-                    {
-                      var ax = aw.arg;
-                      am(av);
-                    }
-                  }
-                  return ax;
-                }
-              }
+        for (var au = this.tryEntries.length - 1; au >= 0; --au) {
+          var av = this.tryEntries[au];
+          if (av.tryLoc === as) {
+            var aw = av.completion;
+            if ("throw" === aw.type) {
+              var ax = aw.arg;
+              am(av);
             }
+            return ax;
           }
-          throw Error("illegal catch attempt");
         }
+        throw Error("illegal catch attempt");
       },
       delegateYield: function (as, at, au) {
-        {
-          this.delegate = {
-            iterator: ao(as),
-            resultName: at,
-            nextLoc: au
-          };
-          "next" === this.method && (this.arg = R);
-          return a9;
-        }
+        this.delegate = {
+          iterator: ao(as),
+          resultName: at,
+          nextLoc: au
+        };
+        "next" === this.method && (this.arg = R);
+        return a9;
       }
     };
     return U;
   }
   function z(P, Q, R, S, T, U, V) {
-    {
-      try {
-        {
-          var X = P[U](V);
-          var Y = X.value;
-        }
-      } catch (a1) {
-        {
-          return void R(a1);
-        }
-      }
-      X.done ? Q(Y) : Promise.resolve(Y).then(S, T);
+    try {
+      var X = P[U](V);
+      var Y = X.value;
+    } catch (a1) {
+      return void R(a1);
     }
+    X.done ? Q(Y) : Promise.resolve(Y).then(S, T);
   }
   function A(P) {
     return function () {
